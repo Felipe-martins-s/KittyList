@@ -1,0 +1,75 @@
+Documentação do Projeto: Kitty List
+
+Este documento detalha a estrutura e o funcionamento do aplicativo Kitty List, uma lista de tarefas simples com persistência local.
+
+## 1. Visão Geral
+
+O aplicativo permite ao usuário adicionar, marcar como concluídas e remover tarefas. Os dados das tarefas são armazenados localmente utilizando o banco de dados Hive.
+
+## 2. Arquitetura
+
+O projeto segue uma arquitetura básica de aplicativo Flutter, com foco na separação da UI, lógica de negócios e persistência de dados.
+
+*   **UI (User Interface):** Definida principalmente em `lib/main.dart` utilizando widgets do Flutter.
+*   **Modelo de Dados:** A estrutura de uma tarefa é definida na classe `Task` em `lib/models/task.dart`.
+*   **Persistência de Dados:** Implementada utilizando o pacote Hive para armazenamento local dos objetos `Task`.
+
+## 3. Principais Arquivos e Componentes
+
+### `lib/main.dart`
+
+Este é o ponto de entrada do aplicativo e contém a lógica principal da interface do usuário e a interação com o Hive.
+
+*   **`main()`:** Função assíncrona que inicializa o Hive, registra o adaptador `TaskAdapter` (gerado automaticamente) e abre a box `tasksBox` para armazenar as tarefas.
+*   **`MyApp` (StatelessWidget):** O widget raiz do aplicativo, configura o `MaterialApp` com o título e tema, definindo `TodoListScreen` como a tela inicial.
+*   **`TodoListScreen` (StatefulWidget):** A tela principal que gerencia o estado da lista de tarefas e exibe a UI.
+*   **`_TodoListScreenState` (State):**
+    *   `_tasksBox`: Referência para a box do Hive onde as tarefas são armazenadas.
+    *   `_textController`: `TextEditingController` para gerenciar o texto do campo de entrada de novas tarefas.
+    *   `_textFieldFocusNode`: `FocusNode` para controlar o foco do campo de entrada, permitindo adicionar tarefas sequencialmente com Enter.
+    *   `initState()`: Inicializa o estado, embora o carregamento das tarefas seja gerenciado pelo `ValueListenableBuilder`.
+    *   `_addTask(String title)`: Adiciona uma nova tarefa à `tasksBox` se o título não for vazio, limpa o campo de texto e retorna o foco para ele.
+    *   `_toggleTask(Task task)`: Inverte o estado `isCompleted` de uma tarefa, salva a mudança no Hive (`task.save()`) e chama `setState` para forçar o redesenho.
+    *   `_removeTask(Task task)`: Encontra o índice da tarefa na `tasksBox`, a remove (`_tasksBox.deleteAt(index)`) e chama `setState` para forçar o redesenho.
+    *   `build(BuildContext context)`: Descreve a UI da tela, incluindo a imagem de background, a área de input, a lista de tarefas (usando `ValueListenableBuilder` para reagir a mudanças no Hive) e o título na base (visível apenas com o teclado fechado).
+    *   `dispose()`: Libera os recursos do `TextEditingController` e `FocusNode`.
+
+### `lib/models/task.dart`
+
+Define a estrutura de dados para uma única tarefa.
+
+*   **`Task` (Classe):**
+    *   Anotada com `@HiveType(typeId: 0)` para ser reconhecida pelo Hive.
+    *   Campos `title` (`String`) e `isCompleted` (`bool`), anotados com `@HiveField(0)` e `@HiveField(1)` respectivamente para mapeamento pelo Hive.
+    *   Construtor para criar novas instâncias de `Task`.
+
+### `pubspec.yaml`
+
+Arquivo de configuração do projeto Flutter.
+
+*   Define o nome, descrição e versão do projeto.
+*   Lista as dependências (`flutter`, `hive`, `hive_flutter`, etc.) e `dev_dependencies` (`hive_generator`, `build_runner`, `flutter_launcher_icons`).
+*   Declara os assets (imagens) e fontes personalizadas (se houver).
+
+## 4. Persistência de Dados (Hive)
+
+O Hive é utilizado para armazenar as tarefas localmente. Os objetos `Task` são salvos em uma "box" (`tasksBox`). As operações de `add`, `save` e `deleteAt` na box ou nos objetos Task persistem os dados. O `ValueListenableBuilder` "escuta" a `tasksBox` e reconstrói a parte da UI que exibe a lista sempre que há uma mudança nos dados.
+
+## 5. Layout e UI
+
+O layout da tela principal (`TodoListScreen`) é construído usando um `Stack` no `body` do `Scaffold` para sobrepor a imagem de background e o conteúdo principal. O `Padding` e o `Positioned` são usados para controlar o espaçamento e a posição dos elementos, ajustando-se à barra de status e à área reservada na base. O estado do teclado é verificado para ocultar o título na base quando o teclado está visível.
+
+## 6. Comandos Importantes
+
+*   `flutter pub get`: Baixa as dependências do projeto.
+*   `flutter packages pub run build_runner build`: Gera arquivos de código (como adaptadores Hive) necessários para o projeto. Deve ser executado após alterações em classes anotadas com `@HiveType`.
+*   `flutter pub run flutter_launcher_icons`: Gera os arquivos de ícone do aplicativo para Android e iOS com base na configuração no `pubspec.yaml`.
+
+## 7. Considerações para Desenvolvimento Futuro
+
+*   Implementar edição de tarefas existentes.
+*   Adicionar funcionalidade de ordenar e filtrar tarefas.
+*   Melhorar a UI/UX com animações e transições.
+*   Tratamento de erros mais robusto.
+
+Este documento serve como um guia para entender a estrutura e o funcionamento básico do aplicativo Kitty List. Para detalhes específicos de implementação, consulte os comentários inline no código-fonte. 
