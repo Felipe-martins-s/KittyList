@@ -62,6 +62,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
   // Usado para manter o campo ativo após adicionar uma tarefa.
   final FocusNode _textFieldFocusNode = FocusNode();
 
+  // Variáveis para gerenciar a edição de tarefas existentes.
+  Task? _editingTask; // A tarefa atualmente em edição (null se nenhuma).
+  final TextEditingController _editController = TextEditingController(); // Controlador para o TextField de edição.
+  final FocusNode _editFocusNode = FocusNode(); // FocusNode para o TextField de edição.
+
   // Método chamado uma vez quando o estado do widget é criado.
   @override
   void initState() {
@@ -107,6 +112,40 @@ class _TodoListScreenState extends State<TodoListScreen> {
     }
     // Força um redesenho do widget para garantir que a UI seja atualizada imediatamente após a exclusão.
     setState(() {});
+  }
+
+  // Método para iniciar a edição de uma tarefa.
+  void _startEditing(Task task) {
+    setState(() {
+      _editingTask = task;
+      _editController.text = task.title; // Preenche o TextField com o título atual.
+    });
+    // Solicita o foco para o TextField após um pequeno atraso para garantir que a UI seja reconstruída.
+    Future.delayed(Duration(milliseconds: 50), () {
+      _editFocusNode.requestFocus();
+    });
+  }
+
+  // Método para salvar a tarefa editada.
+  void _saveEditing(Task task, String newTitle) {
+     if (newTitle.isNotEmpty) {
+      task.title = newTitle; // Atualiza o título da tarefa.
+      task.save(); // Salva a alteração no Hive.
+     }
+    _stopEditing(); // Sai do modo de edição.
+  }
+
+   // Método para cancelar a edição (apenas sai do modo sem salvar).
+  void _cancelEditing() {
+    _stopEditing();
+  }
+
+  // Método interno para sair do modo de edição.
+  void _stopEditing() {
+     setState(() {
+      _editingTask = null; // Define a tarefa em edição como nula.
+      _editController.clear(); // Limpa o controlador.
+     });
   }
 
   // O método build descreve a parte da UI representada por este widget.
@@ -210,8 +249,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
                           itemBuilder: (context, index) {
                             // Obtém a lista de tarefas não concluídas e pega o item pelo índice.
                             final task = box.values.where((task) => !task.isCompleted).toList()[index];
+                            // Verifica se esta tarefa está sendo editada.
+                            final bool isEditing = task == _editingTask;
+
                             // ListTile é um widget conveniente para itens de lista.
                             return ListTile(
+                              // Adicionado onTap para iniciar a edição.
+                              onTap: () => _startEditing(task), // Inicia a edição ao tocar no item.
                               // Widget à esquerda (Checkbox para marcar como concluído).
                               leading: Checkbox(
                                 value: task.isCompleted, // Estado de checked do checkbox.
@@ -219,17 +263,31 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                 activeColor: Colors.white, // Cor do checkbox quando marcado.
                                 checkColor: Colors.blue, // Cor do 'check' dentro do checkbox.
                               ),
-                              // O conteúdo principal do item da lista (o texto da tarefa).
-                              title: Text(
-                                task.title, // Exibe o título da tarefa.
-                                style: TextStyle(
-                                  // Adiciona ou remove a decoração de linha (riscado) com base no estado de conclusão.
-                                  decoration: task.isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none,
-                                  color: Colors.white, // Cor do texto da tarefa.
-                                ),
-                              ),
+                              // O conteúdo principal do item da lista (o texto da tarefa ou TextField).
+                              title: isEditing
+                                  ? TextField(
+                                      controller: _editController, // Usa o controlador de edição.
+                                      focusNode: _editFocusNode, // Usa o FocusNode de edição.
+                                      autofocus: true, // Auto-foca o campo quando aparece.
+                                      decoration: const InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Ajusta o padding interno.
+                                      ),
+                                      // Chamado quando o usuário pressiona Enter.
+                                      onSubmitted: (newValue) => _saveEditing(task, newValue),
+                                      // Opcional: salvar ao perder o foco (pode ser útil).
+                                       onTapOutside: (event) => _saveEditing(task, _editController.text), // Salva ao tocar fora do campo.
+                                    )
+                                  : Text(
+                                      task.title, // Exibe o título da tarefa.
+                                      style: TextStyle(
+                                        // Adiciona ou remove a decoração de linha (riscado) com base no estado de conclusão.
+                                        decoration: task.isCompleted
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                        color: Colors.white, // Cor do texto da tarefa.
+                                      ),
+                                    ),
                               // Widget à direita (botão de exclusão).
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete), // Ícone de lixeira.
@@ -263,8 +321,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
                           itemBuilder: (context, index) {
                             // Obtém a lista de tarefas concluídas e pega o item pelo índice.
                              final task = box.values.where((task) => task.isCompleted).toList()[index];
+                             // Verifica se esta tarefa está sendo editada.
+                            final bool isEditing = task == _editingTask;
+
                             // ListTile é um widget conveniente para itens de lista.
                             return ListTile(
+                              // Adicionado onTap para iniciar a edição.
+                               onTap: () => _startEditing(task), // Inicia a edição ao tocar no item.
                               // Widget à esquerda (Checkbox para marcar como concluído).
                               leading: Checkbox(
                                 value: task.isCompleted, // Estado de checked do checkbox.
@@ -272,17 +335,31 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                 activeColor: Colors.white, // Cor do checkbox quando marcado.
                                 checkColor: Colors.blue, // Cor do 'check' dentro do checkbox.
                               ),
-                              // O conteúdo principal do item da lista (o texto da tarefa).
-                              title: Text(
-                                task.title, // Exibe o título da tarefa.
-                                style: TextStyle(
-                                  // Adiciona ou remove a decoração de linha (riscado) com base no estado de conclusão.
-                                  decoration: task.isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none,
-                                  color: Colors.white, // Cor do texto da tarefa.
-                                ),
-                              ),
+                              // O conteúdo principal do item da lista (o texto da tarefa ou TextField).
+                              title: isEditing
+                                  ? TextField(
+                                      controller: _editController, // Usa o controlador de edição.
+                                      focusNode: _editFocusNode, // Usa o FocusNode de edição.
+                                      autofocus: true, // Auto-foca o campo quando aparece.
+                                      decoration: const InputDecoration(
+                                         border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Ajusta o padding interno.
+                                      ),
+                                      // Chamado quando o usuário pressiona Enter.
+                                      onSubmitted: (newValue) => _saveEditing(task, newValue),
+                                        // Opcional: salvar ao perder o foco (pode ser útil).
+                                       onTapOutside: (event) => _saveEditing(task, _editController.text), // Salva ao tocar fora do campo.
+                                    )
+                                  : Text(
+                                      task.title, // Exibe o título da tarefa.
+                                      style: TextStyle(
+                                        // Adiciona ou remove a decoração de linha (riscado) com base no estado de conclusão.
+                                        decoration: task.isCompleted
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                        color: Colors.white, // Cor do texto da tarefa.
+                                      ),
+                                    ),
                               // Widget à direita (botão de exclusão).
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete), // Ícone de lixeira.
@@ -333,6 +410,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
     _textController.dispose();
     // Descarta o FocusNode para liberar seus recursos.
     _textFieldFocusNode.dispose();
+     // Descarta o controlador de edição e FocusNode.
+    _editController.dispose();
+    _editFocusNode.dispose();
     // Chama o dispose do superclasse.
     super.dispose();
   }
