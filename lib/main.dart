@@ -114,6 +114,34 @@ class _TodoListScreenState extends State<TodoListScreen> {
     setState(() {});
   }
 
+  // Método para mostrar um diálogo de confirmação antes de remover uma tarefa.
+  void _confirmDeleteTask(Task task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content: Text('Tem certeza que deseja excluir a tarefa "${task.title}"?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+            TextButton(
+              child: const Text('Excluir'),
+              onPressed: () {
+                _removeTask(task); // Chama o método de remoção se confirmado
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // Método para iniciar a edição de uma tarefa.
   void _startEditing(Task task) {
     setState(() {
@@ -133,11 +161,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
       task.save(); // Salva a alteração no Hive.
      }
     _stopEditing(); // Sai do modo de edição.
-  }
-
-   // Método para cancelar a edição (apenas sai do modo sem salvar).
-  void _cancelEditing() {
-    _stopEditing();
   }
 
   // Método interno para sair do modo de edição.
@@ -254,7 +277,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
                             // ListTile é um widget conveniente para itens de lista.
                             return ListTile(
-                              // Adicionado onTap para iniciar a edição.
+                               // Adicionado onTap para iniciar a edição.
                               onTap: () => _startEditing(task), // Inicia a edição ao tocar no item.
                               // Widget à esquerda (Checkbox para marcar como concluído).
                               leading: Checkbox(
@@ -291,7 +314,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                               // Widget à direita (botão de exclusão).
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete), // Ícone de lixeira.
-                                onPressed: () => _removeTask(task), // Chamado ao pressionar o botão.
+                                onPressed: () => _confirmDeleteTask(task), // Chama o diálogo de confirmação
                                 color: Colors.white, // Cor do ícone.
                               ),
                             );
@@ -363,7 +386,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                               // Widget à direita (botão de exclusão).
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete), // Ícone de lixeira.
-                                onPressed: () => _removeTask(task), // Chamado ao pressionar o botão.
+                                onPressed: () => _confirmDeleteTask(task), // Chama o diálogo de confirmação
                                 color: Colors.white, // Cor do ícone.
                               ),
                             );
