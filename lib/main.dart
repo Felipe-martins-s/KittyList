@@ -88,7 +88,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
     // Inverte o estado isCompleted da tarefa.
     task.isCompleted = !task.isCompleted;
     // Salva as mudanças no objeto Task de volta para a box do Hive.
-    // O Hive notificará os listeners (como o ValueListenableBuilder).
     task.save();
     // Força um redesenho do widget para garantir que a UI seja atualizada imediatamente.
     // Embora o Hive deva notificar, setState garante a atualização visual neste layout específico.
@@ -155,8 +154,8 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 ),
                 // Contêiner com fundo cinza semi-transparente para a área de conteúdo.
                 child: Container(
-                  // Cor cinza com 60% de opacidade.
-                  color: Colors.grey.withAlpha((255 * 0.6).round()),
+                  // Cor cinza com 40% de opacidade (mais transparente).
+                  color: Colors.grey.withAlpha((255 * 0.4).round()),
                   // Column organiza os widgets verticalmente.
                   child: Column(
                     children: [
@@ -250,9 +249,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 child: Text(
                   'Kitty List', // O texto do título.
                   style: TextStyle(
-                    fontSize: 24.0, // Tamanho da fonte.
+                    fontSize: 32.0, // Tamanho da fonte mantido em 32
                     fontWeight: FontWeight.bold, // Peso da fonte (negrito).
-                    color: Colors.white, // Cor do texto (branco).
+                    color: Colors.black, // Cor do texto alterada para preto
                   ),
                 ),
               ),

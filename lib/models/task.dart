@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 part 'task.g.dart';
 
 @HiveType(typeId: 0)
-class Task {
+class Task extends HiveObject {
   @HiveField(0)
   String title;
 
@@ -14,8 +14,4 @@ class Task {
     required this.title,
     this.isCompleted = false,
   });
-
-  void delete() {}
-
-  void save() {}
 } 
