@@ -6,7 +6,10 @@ Um aplicativo simples de lista de tarefas desenvolvido em Flutter.
 
 *   Adicionar novas tarefas.
 *   Marcar tarefas como concluídas (texto riscado).
+*   **Editar tarefas tocando no item da lista.**
+*   **Confirmação antes de remover tarefas para evitar exclusões acidentais.**
 *   Remover tarefas.
+*   **Visualização separada de tarefas a fazer e tarefas concluídas.**
 *   Persistência local dos dados usando Hive.
 *   Background personalizado.
 
@@ -16,7 +19,7 @@ Um aplicativo simples de lista de tarefas desenvolvido em Flutter.
 2.  Clone este repositório (ou baixe os arquivos do projeto).
 3.  Navegue até a pasta raiz do projeto no terminal (`KittyList`).
 4.  Execute `flutter pub get` para baixar as dependências do projeto.
-5.  Execute `flutter packages pub run build_runner build` para gerar os arquivos necessários do Hive.
+5.  Execute `flutter packages pub run build_runner build` para gerar os arquivos necessários do Hive. **Execute este comando novamente se modificar a estrutura da classe `Task` (lib/models/task.dart).**
 6.  Conecte um dispositivo Android/iOS ou inicie um emulador/simulador.
 7.  No Android Studio (ou VS Code), selecione o dispositivo e clique no botão Run (ou execute `flutter run` no terminal).
 
