@@ -189,16 +189,80 @@ class _TodoListScreenState extends State<TodoListScreen> {
                       ),
                       // Espaço vertical entre a área de input e a lista de tarefas.
                       const SizedBox(height: 16),
-                      // Área que expande para ocupar o espaço vertical restante para a lista.
+                      // Título para as tarefas a fazer.
+                      const Text(
+                        'Tarefas a Fazer',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Área que expande para ocupar o espaço vertical restante para a lista de tarefas a fazer.
                       Expanded(
+                        flex: 1, // Dá flexibilidade para ocupar espaço
                         // ListView.builder cria itens de lista sob demanda.
                         child: ListView.builder(
                           // Número total de itens na lista (do Hive box).
-                          itemCount: box.length,
+                          itemCount: box.values.where((task) => !task.isCompleted).length, // Conta apenas tarefas não concluídas
                           // Constrói cada item da lista.
                           itemBuilder: (context, index) {
-                            // Obtém o objeto Task do Hive box pelo índice.
-                            final task = box.getAt(index)!;
+                            // Obtém a lista de tarefas não concluídas e pega o item pelo índice.
+                            final task = box.values.where((task) => !task.isCompleted).toList()[index];
+                            // ListTile é um widget conveniente para itens de lista.
+                            return ListTile(
+                              // Widget à esquerda (Checkbox para marcar como concluído).
+                              leading: Checkbox(
+                                value: task.isCompleted, // Estado de checked do checkbox.
+                                onChanged: (_) => _toggleTask(task), // Chamado ao marcar/desmarcar.
+                                activeColor: Colors.white, // Cor do checkbox quando marcado.
+                                checkColor: Colors.blue, // Cor do 'check' dentro do checkbox.
+                              ),
+                              // O conteúdo principal do item da lista (o texto da tarefa).
+                              title: Text(
+                                task.title, // Exibe o título da tarefa.
+                                style: TextStyle(
+                                  // Adiciona ou remove a decoração de linha (riscado) com base no estado de conclusão.
+                                  decoration: task.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : TextDecoration.none,
+                                  color: Colors.white, // Cor do texto da tarefa.
+                                ),
+                              ),
+                              // Widget à direita (botão de exclusão).
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete), // Ícone de lixeira.
+                                onPressed: () => _removeTask(task), // Chamado ao pressionar o botão.
+                                color: Colors.white, // Cor do ícone.
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                       // Espaço vertical entre as listas.
+                      const SizedBox(height: 16),
+                       // Título para as tarefas concluídas.
+                      const Text(
+                        'Tarefas Concluídas',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                       // Área que expande para ocupar o espaço vertical restante para a lista de tarefas concluídas.
+                      Expanded(
+                         flex: 1, // Dá flexibilidade para ocupar espaço
+                        // ListView.builder cria itens de lista sob demanda.
+                        child: ListView.builder(
+                          // Número total de itens na lista (do Hive box).
+                           itemCount: box.values.where((task) => task.isCompleted).length, // Conta apenas tarefas concluídas
+                          // Constrói cada item da lista.
+                          itemBuilder: (context, index) {
+                            // Obtém a lista de tarefas concluídas e pega o item pelo índice.
+                             final task = box.values.where((task) => task.isCompleted).toList()[index];
                             // ListTile é um widget conveniente para itens de lista.
                             return ListTile(
                               // Widget à esquerda (Checkbox para marcar como concluído).
