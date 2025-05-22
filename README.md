@@ -36,4 +36,4 @@ Um aplicativo simples de lista de tarefas desenvolvido em Flutter.
 
 ## Autor
 
-[Seu Nome/Usuário]
+Felipe MS
