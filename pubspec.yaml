@@ -27,6 +27,11 @@ flutter:
   assets:
     - assets/images/BackgroudBanco.png
 
+  fonts:
+    - family: Upheaval
+      fonts:
+        - asset: assets/fonts/upheavtt.ttf
+
 # Removed custom fonts section
 
 # Removed font dependencies 

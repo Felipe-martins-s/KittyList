@@ -67,7 +67,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
   final TextEditingController _editController = TextEditingController(); // Controlador para o TextField de edição.
   final FocusNode _editFocusNode = FocusNode(); // FocusNode para o TextField de edição.
 
-  // Método chamado uma vez quando o estado do widget é criado.
+  // Metodo chamado uma vez quando o estado do widget é criado.
   @override
   void initState() {
     super.initState();
@@ -75,7 +75,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     // Não precisamos carregar manualmente uma lista aqui.
   }
 
-  // Método para adicionar uma nova tarefa à lista (box do Hive).
+  // Metodo para adicionar uma nova tarefa à lista (box do Hive).
   void _addTask(String title) {
     // Verifica se o título não está vazio antes de adicionar.
     if (title.isNotEmpty) {
@@ -88,7 +88,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     }
   }
 
-  // Método para marcar ou desmarcar uma tarefa como concluída.
+  // Metodo para marcar ou desmarcar uma tarefa como concluída.
   void _toggleTask(Task task) {
     // Inverte o estado isCompleted da tarefa.
     task.isCompleted = !task.isCompleted;
@@ -99,7 +99,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     setState(() {});
   }
 
-  // Método para remover uma tarefa da lista (box do Hive).
+  // Metodo para remover uma tarefa da lista (box do Hive).
   void _removeTask(Task task) {
     // Encontra o índice da tarefa na box para excluí-la corretamente.
     // Convertemos os valores da box para uma lista temporária para encontrar o índice.
@@ -114,7 +114,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     setState(() {});
   }
 
-  // Método para mostrar um diálogo de confirmação antes de remover uma tarefa.
+  // Metodo para mostrar um diálogo de confirmação antes de remover uma tarefa.
   void _confirmDeleteTask(Task task) {
     showDialog(
       context: context,
@@ -132,7 +132,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
             TextButton(
               child: const Text('Excluir'),
               onPressed: () {
-                _removeTask(task); // Chama o método de remoção se confirmado
+                _removeTask(task); // Chama o Metodo de remoção se confirmado
                 Navigator.of(context).pop(); // Fecha o diálogo
               },
             ),
@@ -142,7 +142,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
   }
 
-  // Método para iniciar a edição de uma tarefa.
+  // Metodo para iniciar a edição de uma tarefa.
   void _startEditing(Task task) {
     setState(() {
       _editingTask = task;
@@ -154,7 +154,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     });
   }
 
-  // Método para salvar a tarefa editada.
+  // Metodo para salvar a tarefa editada.
   void _saveEditing(Task task, String newTitle) {
      if (newTitle.isNotEmpty) {
       task.title = newTitle; // Atualiza o título da tarefa.
@@ -163,7 +163,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     _stopEditing(); // Sai do modo de edição.
   }
 
-  // Método interno para sair do modo de edição.
+  // Metodo interno para sair do modo de edição.
   void _stopEditing() {
      setState(() {
       _editingTask = null; // Define a tarefa em edição como nula.
@@ -171,7 +171,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
      });
   }
 
-  // O método build descreve a parte da UI representada por este widget.
+  // O metodo build descreve a parte da UI representada por este widget.
   @override
   Widget build(BuildContext context) {
     // Obtém a altura do teclado virtual visível na tela.
@@ -191,7 +191,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
       body: Stack(
         // Stack permite empilhar widgets uns sobre os outros.
         children: [
-          // Imagem de background que preenche todo o corpo do Scaffold.
+          // Imagem de background que preenche o corpo do Scaffold.
           Positioned.fill(
             child: Image.asset(
               'assets/images/BackgroudBanco.png', // Caminho da imagem de background.
@@ -402,20 +402,33 @@ class _TodoListScreenState extends State<TodoListScreen> {
           // Título do aplicativo posicionado na parte inferior da tela.
           // Visível apenas quando o teclado virtual está fechado.
           if (keyboardHeight == 0)
-            const Positioned(
-              // Posição horizontal: 0 da esquerda e 0 da direita + Center centraliza o texto.
+            Positioned(
               left: 0,
               right: 0,
-              // Posição vertical: 40.0 pixels acima da base da tela. Ajuste para alinhar com a imagem.
-              bottom: 40.0,
-              // Centraliza o texto horizontalmente na área definida pelo Positioned.
+              bottom: 21.0,
               child: Center(
-                child: Text(
-                  'Kitty List', // O texto do título.
-                  style: TextStyle(
-                    fontSize: 32.0, // Tamanho da fonte mantido em 32
-                    fontWeight: FontWeight.bold, // Peso da fonte (negrito).
-                    color: Colors.black, // Cor do texto alterada para preto
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff8e68e6),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha((0.5 * 255).round()),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'Kitty List',
+                    style: TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xffeab7ef),
+                      fontFamily: 'Upheaval',
+                    ),
                   ),
                 ),
               ),
@@ -425,7 +438,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
   }
 
-  // Método chamado quando o widget é removido da árvore de widgets.
+  // Metodo chamado quando o widget é removido da árvore de widgets.
   // Importante para liberar recursos.
   @override
   void dispose() {
