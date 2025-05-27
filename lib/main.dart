@@ -67,8 +67,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
       _tasksBox.add(Task(title: title));
       // Limpa o campo de texto
       _textController.clear();
-      // Mantém o foco no campo
-      _textFieldFocusNode.requestFocus();
+      // Mantém o foco apenas se já estiver ativo
+      if (_textFieldFocusNode.hasFocus) {
+        _textFieldFocusNode.requestFocus();
+      }
     }
   }
 
