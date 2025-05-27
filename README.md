@@ -34,9 +34,15 @@ Um aplicativo simples de lista de tarefas desenvolvido em Flutter.
 ## Dependências Principais
 
 *   `flutter`: SDK do Flutter.
-*   `hive`, `hive_flutter`: Banco de dados NoSQL local.
-*   `flutter_launcher_icons`: Para gerar ícones de aplicativo.
+*   `hive`, `hive_flutter`: Banco de dados pra salvar as tarefas.
+*   `flutter_launcher_icons`: Pra fazer os ícones do app.
 
-## Autor
+## Autores
 
-Felipe MS
+Academicos de ADS da Univinte:
+Ana Caroline
+Ewellin
+Felipe
+Manoel
+Patrick
+Vitória

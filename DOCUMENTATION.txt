@@ -1,6 +1,6 @@
 Documentação do Projeto: Kitty List
 
-Este documento detalha a estrutura e o funcionamento do aplicativo Kitty List, uma lista de tarefas simples com persistência local.
+Este documento explica como o app Kitty List funciona, uma lista de tarefas que salva os dados localmente.
 
 ## 1. Visão Geral
 
