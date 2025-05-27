@@ -184,7 +184,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 ),
                 // Área cinza semi-transparente
                 child: Container(
-                  color: Colors.grey.withAlpha((255 * 0.4).round()),
+                  color: Colors.grey.withAlpha((255 * 0.0).round()),
                   child: Column(
                     children: [
                       // Campo para adicionar tarefas
