@@ -40,9 +40,10 @@ Um aplicativo simples de lista de tarefas desenvolvido em Flutter.
 ## Autores
 
 Academicos de ADS da Univinte:
-- Ana Caroline;
-- Ewellin;
-- Felipe;
-- Manoel;
-- Patrick;
-- Vitória;
+- Ana Carolina Bitencourt;
+- Ewellin Barreto;
+- Felipe Martins;
+- Manoel Vitor;
+- Patrick Luiz Farias;
+- Vitória Silva;
+
