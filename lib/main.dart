@@ -76,6 +76,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   // Marca ou desmarca uma tarefa como feita
   void _toggleTask(Task task) {
+    // Remove o foco do input de adicionar tarefa
+    if (_textFieldFocusNode.hasFocus) {
+      _textFieldFocusNode.unfocus();
+    }
     // Inverte o estado da tarefa
     task.isCompleted = !task.isCompleted;
     // Salva a mudança
@@ -86,6 +90,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   // Remove uma tarefa
   void _removeTask(Task task) {
+    // Remove o foco do input de adicionar tarefa
+    if (_textFieldFocusNode.hasFocus) {
+      _textFieldFocusNode.unfocus();
+    }
     // Acha onde a tarefa está na lista
     final int index = _tasksBox.values.toList().indexOf(task);
     if (index != -1) {
@@ -98,6 +106,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   // Mostra um popup para confirmar a exclusão
   void _confirmDeleteTask(Task task) {
+    // Remove o foco do input de adicionar tarefa
+    if (_textFieldFocusNode.hasFocus) {
+      _textFieldFocusNode.unfocus();
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -126,6 +138,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   // Começa a editar uma tarefa
   void _startEditing(Task task) {
+    // Remove o foco do input de adicionar tarefa
+    if (_textFieldFocusNode.hasFocus) {
+      _textFieldFocusNode.unfocus();
+    }
     setState(() {
       _editingTask = task;
       _editController.text = task.title; // Coloca o texto atual no campo
@@ -177,156 +193,172 @@ class _TodoListScreenState extends State<TodoListScreen> {
           ValueListenableBuilder(
             valueListenable: _tasksBox.listenable(),
             builder: (context, box, _) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  top: statusBarHeight + 8.0,
-                  left: 16.0,
-                  right: 16.0,
-                  bottom: reservedBottomSpace,
-                ),
-                // Área cinza semi-transparente
-                child: Container(
-                  color: Colors.grey.withAlpha((255 * 0.0).round()),
-                  child: Column(
-                    children: [
-                      // Campo para adicionar tarefas
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _textController,
-                              focusNode: _textFieldFocusNode,
-                              decoration: const InputDecoration(
-                                hintText: 'Adicionar nova tarefa',
-                                border: OutlineInputBorder(),
+              return GestureDetector(
+                onTap: () {
+                  // Remove o foco quando tocar em qualquer lugar fora do input
+                  if (_textFieldFocusNode.hasFocus) {
+                    _textFieldFocusNode.unfocus();
+                  }
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: statusBarHeight + 8.0,
+                    left: 16.0,
+                    right: 16.0,
+                    bottom: reservedBottomSpace,
+                  ),
+                  // Área cinza semi-transparente
+                  child: Container(
+                    color: Colors.grey.withAlpha((255 * 0.0).round()),
+                    child: Column(
+                      children: [
+                        // Campo para adicionar tarefas
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _textController,
+                                focusNode: _textFieldFocusNode,
+                                decoration: const InputDecoration(
+                                  hintText: 'Adicionar nova tarefa',
+                                  border: OutlineInputBorder(),
+                                ),
+                                onSubmitted: (value) {
+                                  _addTask(value);
+                                  // Mantém o foco após adicionar via teclado
+                                  _textFieldFocusNode.requestFocus();
+                                },
                               ),
-                              onSubmitted: _addTask,
                             ),
+                            const SizedBox(width: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                _addTask(_textController.text);
+                                // Mantém o foco após adicionar via botão
+                                _textFieldFocusNode.requestFocus();
+                              },
+                              child: const Text('Adicionar'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Título da lista de tarefas não feitas
+                        const Text(
+                          'Tarefas a Fazer',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
-                          const SizedBox(width: 16),
-                          ElevatedButton(
-                            onPressed: () => _addTask(_textController.text),
-                            child: const Text('Adicionar'),
+                        ),
+                        const SizedBox(height: 8),
+                        // Lista de tarefas não feitas
+                        Expanded(
+                          flex: 1,
+                          child: ListView.builder(
+                            itemCount: box.values.where((task) => !task.isCompleted).length,
+                            itemBuilder: (context, index) {
+                              final task = box.values.where((task) => !task.isCompleted).toList()[index];
+                              final bool isEditing = task == _editingTask;
+
+                              return ListTile(
+                                onTap: () => _startEditing(task),
+                                leading: Checkbox(
+                                  value: task.isCompleted,
+                                  onChanged: (_) => _toggleTask(task),
+                                  activeColor: Colors.white,
+                                  checkColor: Colors.blue,
+                                ),
+                                title: isEditing
+                                    ? TextField(
+                                        controller: _editController,
+                                        focusNode: _editFocusNode,
+                                        autofocus: true,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        ),
+                                        onSubmitted: (newValue) => _saveEditing(task, newValue),
+                                        onTapOutside: (event) => _saveEditing(task, _editController.text),
+                                      )
+                                    : Text(
+                                        task.title,
+                                        style: TextStyle(
+                                          decoration: task.isCompleted
+                                              ? TextDecoration.lineThrough
+                                              : TextDecoration.none,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () => _confirmDeleteTask(task),
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Título da lista de tarefas não feitas
-                      const Text(
-                        'Tarefas a Fazer',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Lista de tarefas não feitas
-                      Expanded(
-                        flex: 1,
-                        child: ListView.builder(
-                          itemCount: box.values.where((task) => !task.isCompleted).length,
-                          itemBuilder: (context, index) {
-                            final task = box.values.where((task) => !task.isCompleted).toList()[index];
-                            final bool isEditing = task == _editingTask;
+                        const SizedBox(height: 16),
+                        // Título da lista de tarefas feitas
+                        const Text(
+                          'Tarefas Concluídas',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Lista de tarefas feitas
+                        Expanded(
+                          flex: 1,
+                          child: ListView.builder(
+                            itemCount: box.values.where((task) => task.isCompleted).length,
+                            itemBuilder: (context, index) {
+                              final task = box.values.where((task) => task.isCompleted).toList()[index];
+                              final bool isEditing = task == _editingTask;
 
-                            return ListTile(
-                              onTap: () => _startEditing(task),
-                              leading: Checkbox(
-                                value: task.isCompleted,
-                                onChanged: (_) => _toggleTask(task),
-                                activeColor: Colors.white,
-                                checkColor: Colors.blue,
-                              ),
-                              title: isEditing
-                                  ? TextField(
-                                      controller: _editController,
-                                      focusNode: _editFocusNode,
-                                      autofocus: true,
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              return ListTile(
+                                onTap: () => _startEditing(task),
+                                leading: Checkbox(
+                                  value: task.isCompleted,
+                                  onChanged: (_) => _toggleTask(task),
+                                  activeColor: Colors.white,
+                                  checkColor: Colors.blue,
+                                ),
+                                title: isEditing
+                                    ? TextField(
+                                        controller: _editController,
+                                        focusNode: _editFocusNode,
+                                        autofocus: true,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        ),
+                                        onSubmitted: (newValue) => _saveEditing(task, newValue),
+                                        onTapOutside: (event) => _saveEditing(task, _editController.text),
+                                      )
+                                    : Text(
+                                        task.title,
+                                        style: TextStyle(
+                                          decoration: task.isCompleted
+                                              ? TextDecoration.lineThrough
+                                              : TextDecoration.none,
+                                          color: Colors.white,
+                                        ),
                                       ),
-                                      onSubmitted: (newValue) => _saveEditing(task, newValue),
-                                      onTapOutside: (event) => _saveEditing(task, _editController.text),
-                                    )
-                                  : Text(
-                                      task.title,
-                                      style: TextStyle(
-                                        decoration: task.isCompleted
-                                            ? TextDecoration.lineThrough
-                                            : TextDecoration.none,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => _confirmDeleteTask(task),
-                                color: Colors.white,
-                              ),
-                            );
-                          },
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () => _confirmDeleteTask(task),
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Título da lista de tarefas feitas
-                      const Text(
-                        'Tarefas Concluídas',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Lista de tarefas feitas
-                      Expanded(
-                        flex: 1,
-                        child: ListView.builder(
-                          itemCount: box.values.where((task) => task.isCompleted).length,
-                          itemBuilder: (context, index) {
-                            final task = box.values.where((task) => task.isCompleted).toList()[index];
-                            final bool isEditing = task == _editingTask;
-
-                            return ListTile(
-                              onTap: () => _startEditing(task),
-                              leading: Checkbox(
-                                value: task.isCompleted,
-                                onChanged: (_) => _toggleTask(task),
-                                activeColor: Colors.white,
-                                checkColor: Colors.blue,
-                              ),
-                              title: isEditing
-                                  ? TextField(
-                                      controller: _editController,
-                                      focusNode: _editFocusNode,
-                                      autofocus: true,
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      ),
-                                      onSubmitted: (newValue) => _saveEditing(task, newValue),
-                                      onTapOutside: (event) => _saveEditing(task, _editController.text),
-                                    )
-                                  : Text(
-                                      task.title,
-                                      style: TextStyle(
-                                        decoration: task.isCompleted
-                                            ? TextDecoration.lineThrough
-                                            : TextDecoration.none,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => _confirmDeleteTask(task),
-                                color: Colors.white,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
