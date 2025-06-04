@@ -1,22 +1,19 @@
-// Importa as bibliotecas que vamos usar
+// Importando as bibliotecas necessárias
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/task.dart';
 
-// Função principal que inicia o app
+// Função que inicia o app
 Future<void> main() async {
-  // Inicializa o Hive (banco de dados)
+  // Configurando o banco de dados local
   await Hive.initFlutter();
-  // Registra o adaptador da Task
   Hive.registerAdapter(TaskAdapter());
-  // Abre a caixa onde vamos guardar as tarefas
   await Hive.openBox<Task>('tasksBox');
 
-  // Inicia o app
   runApp(const MyApp());
 }
 
-// Widget principal do app
+// Classe principal do app
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -25,14 +22,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kitty List',
       theme: ThemeData(
-        primarySwatch: Colors.blue, // Cor principal do app
+        primarySwatch: Colors.blue,
       ),
       home: const TodoListScreen(),
     );
   }
 }
 
-// Tela principal onde ficam as tarefas
+// Tela que mostra a lista de tarefas
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({super.key});
 
@@ -40,73 +37,59 @@ class TodoListScreen extends StatefulWidget {
   State<TodoListScreen> createState() => _TodoListScreenState();
 }
 
-// Estado da tela principal
+// Estado da tela de tarefas
 class _TodoListScreenState extends State<TodoListScreen> {
-  // Caixa do Hive onde guardamos as tarefas
+  // Banco de dados local
   final _tasksBox = Hive.box<Task>('tasksBox');
-  // Controlador do campo de texto para adicionar tarefas
+  // Campo para digitar nova tarefa
   final TextEditingController _textController = TextEditingController();
-  // Controla o foco do campo de texto
   final FocusNode _textFieldFocusNode = FocusNode();
 
-  // Variáveis para editar tarefas
-  Task? _editingTask; // Tarefa que está sendo editada
-  final TextEditingController _editController = TextEditingController(); // Controlador do campo de edição
-  final FocusNode _editFocusNode = FocusNode(); // Foco do campo de edição
+  // Variáveis para editar tarefa
+  Task? _editingTask;
+  final TextEditingController _editController = TextEditingController();
+  final FocusNode _editFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    // Não precisa carregar nada aqui, o Hive já faz isso
   }
 
-  // Adiciona uma nova tarefa
+  // Função que adiciona uma tarefa nova
   void _addTask(String title) {
     if (title.isNotEmpty) {
-      // Cria e adiciona a tarefa
       _tasksBox.add(Task(title: title));
-      // Limpa o campo de texto
       _textController.clear();
-      // Mantém o foco apenas se já estiver ativo
       if (_textFieldFocusNode.hasFocus) {
         _textFieldFocusNode.requestFocus();
       }
     }
   }
 
-  // Marca ou desmarca uma tarefa como feita
+  // Função que marca/desmarca tarefa como feita
   void _toggleTask(Task task) {
-    // Remove o foco do input de adicionar tarefa
     if (_textFieldFocusNode.hasFocus) {
       _textFieldFocusNode.unfocus();
     }
-    // Inverte o estado da tarefa
     task.isCompleted = !task.isCompleted;
-    // Salva a mudança
     task.save();
-    // Atualiza a tela
     setState(() {});
   }
 
-  // Remove uma tarefa
+  // Função que remove uma tarefa
   void _removeTask(Task task) {
-    // Remove o foco do input de adicionar tarefa
     if (_textFieldFocusNode.hasFocus) {
       _textFieldFocusNode.unfocus();
     }
-    // Acha onde a tarefa está na lista
     final int index = _tasksBox.values.toList().indexOf(task);
     if (index != -1) {
-      // Remove a tarefa
       _tasksBox.deleteAt(index);
     }
-    // Atualiza a tela
     setState(() {});
   }
 
-  // Mostra um popup para confirmar a exclusão
+  // Mostra popup de confirmação antes de excluir
   void _confirmDeleteTask(Task task) {
-    // Remove o foco do input de adicionar tarefa
     if (_textFieldFocusNode.hasFocus) {
       _textFieldFocusNode.unfocus();
     }
@@ -120,14 +103,14 @@ class _TodoListScreenState extends State<TodoListScreen> {
             TextButton(
               child: const Text('Cancelar'),
               onPressed: () {
-                Navigator.of(context).pop(); // Fecha o popup
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text('Excluir'),
               onPressed: () {
-                _removeTask(task); // Remove a tarefa
-                Navigator.of(context).pop(); // Fecha o popup
+                _removeTask(task);
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -136,36 +119,34 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
   }
 
-  // Começa a editar uma tarefa
+  // Inicia a edição de uma tarefa
   void _startEditing(Task task) {
-    // Remove o foco do input de adicionar tarefa
     if (_textFieldFocusNode.hasFocus) {
       _textFieldFocusNode.unfocus();
     }
     setState(() {
       _editingTask = task;
-      _editController.text = task.title; // Coloca o texto atual no campo
+      _editController.text = task.title;
     });
-    // Dá foco ao campo de edição
     Future.delayed(Duration(milliseconds: 50), () {
       _editFocusNode.requestFocus();
     });
   }
 
-  // Salva a tarefa editada
+  // Salva a tarefa após edição
   void _saveEditing(Task task, String newTitle) {
      if (newTitle.isNotEmpty) {
-      task.title = newTitle; // Atualiza o título
-      task.save(); // Salva no Hive
+      task.title = newTitle;
+      task.save();
      }
-    _stopEditing(); // Para de editar
+    _stopEditing();
   }
 
-  // Para de editar
+  // Finaliza a edição
   void _stopEditing() {
      setState(() {
-      _editingTask = null; // Limpa a tarefa em edição
-      _editController.clear(); // Limpa o campo
+      _editingTask = null;
+      _editController.clear();
      });
   }
 
